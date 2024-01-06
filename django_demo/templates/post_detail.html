@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+{% load crispy_forms_tags %}
+{% block content %}
+  <article class="media content-section">
+    <img class="rounded-circle article-img" src="{{ post.author.profile.image.url }}">
+    <div class="media-body">
+      <div class="article-metadata">
+        <h3>{{ post.author }}</h3>
+        <small class="text-muted">{{ post.date_posted|date:"F d, Y" }}</small>
+        {% if post.author == user %}
+          <div>
+            <a class="btn btn-secondary btn-sm mt-1 mb-1" href="{% url 'post-update' post.id %}">Update</a>
+            <a class="btn btn-danger btn-sm mt-1 mb-1" href="{% url 'post-delete' post.id %}">Delete</a>
+          </div>
+        {% endif %}
+      </div>
+      <h2 class="article-title">{{ post.title }}</h2>
+      
+      {% if post.image %} 
+                        
+      <div class="container">
+          <img src="{{ post.image.url }}"class="img-fluid" alt="Responsive Image">
+        </div>
+  {% endif %}
+  {% if post.video %}
+     
+
+      <div class="container">
+          <div class="embed-responsive embed-responsive-16by9">
+            <video class="embed-responsive-item" controls>
+              <source src="{{ post.video.url }}" type="video/mp4">
+              Your browser does not support the video tag.
+            </video>
+          </div>
+        </div>
+
+  {% endif %}
+
+
+      <p class="article-content">{{ post.content }}</p>
+      
+
+      <form action="{% url 'like_post' post.id %}" method="POST">
+        {% csrf_token %}
+        
+        <small>{{ post.likes.all|length }}  likes </small>
+     
+
+     
+        <button class="btn btn-sm" type="submit" name="post_id" value="{{post.id}}">
+            {% if request.user in post.likes.all %}
+                
+                <i class="ri-thumb-down-line" style="color: red;"></i>
+            {% else %}
+                
+                <i class="ri-thumb-up-line" style="color: lightseagreen;"></i>
+            {% endif %}
+        </button>
+
+    </form>
+        
+       <br/>
+
+
+  
+  </article>
+ 
+<div class="comment-item">
+  
+  <h5  id="toggleCommentsButton"><strong>Comments ...</strong></h5>
+
+  {% for comment in comments %}
+      <p><b> {{ comment.author }} on {{ comment.created_date }}</b></p>
+      <p><i>  cmment  :  </i>{{ comment.text }}</p> 
+  {% endfor %}
+
+  <!-- Display new comment form -->
+  <h3><b>Add your comment here :</b>  </h3>
+  <form method="post" action="">
+      {% csrf_token %}
+      {{ comment_form|crispy }}
+      <button class="btn btn-primary btn-sm mt-1 mb-1"  type="submit">Add</button>
+  </form>
+</div>
+<!-- Inside your template, at the end of the body tag -->
+<script>
+  // JavaScript code to hide and show comments
+  document.addEventListener('DOMContentLoaded', function () {
+      // Add event listeners or use other mechanisms to trigger the hide/show functionality
+      // Here's a basic example using a button
+      const toggleButton = document.getElementById('toggleCommentsButton');
+      const commentItems = document.querySelectorAll('.comment-item');
+
+      toggleButton.addEventListener('click', function () {
+          commentItems.forEach(function (commentItem) {
+              // Toggle the 'hidden' class to hide/show comments
+              commentItem.classList.toggle('hidden');
+          });
+      });
+  });
+</script>
+
+{% endblock content %}
